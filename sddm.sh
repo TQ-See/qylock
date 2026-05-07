@@ -216,6 +216,7 @@ if [ "$SELECTED_THEME" == "clockwork" ]; then
 
     success "Selected variant: ${C_ACCENT}$CW_SUBDIR${C_RESET}"
     SELECTED_THEME="clockwork/$CW_SUBDIR"
+    INSTALL_NAME="$CW_SUBDIR"
 
     # Orbital Custom
     if [ "$CW_SUBDIR" == "orbital" ]; then
@@ -273,6 +274,9 @@ if [ -z "$SELECTED_THEME" ]; then
     exit 0
 fi
 
+# If no INSTALL_NAME override (clockwork sub-themes), use SELECTED_THEME as-is
+INSTALL_NAME="${INSTALL_NAME:-$SELECTED_THEME}"
+
 substep "Selected: ${C_ACCENT}${SELECTED_THEME}${C_RESET}"
 
 # Font Check
@@ -295,8 +299,8 @@ if [ ! -d "$SYSTEM_THEMES_DIR" ]; then
 fi
 
 # Copy Theme
-substep "Copying theme to /usr/share/sddm/themes/..."
-sudo cp -r "$THEMES_DIR/$SELECTED_THEME" "$SYSTEM_THEMES_DIR/"
+substep "Copying theme to /usr/share/sddm/themes/$INSTALL_NAME/..."
+sudo cp -r "$THEMES_DIR/$SELECTED_THEME" "$SYSTEM_THEMES_DIR/$INSTALL_NAME"
 
 # Update SDDM
 substep "Updating sddm settings..."
@@ -305,18 +309,18 @@ if [ ! -d "$SDDM_CONF_DIR" ]; then
 fi
 
 if [ ! -f "$SDDM_CONF" ]; then
-    echo -e "[Theme]\nCurrent=$SELECTED_THEME" | sudo tee "$SDDM_CONF" > /dev/null
+    echo -e "[Theme]\nCurrent=$INSTALL_NAME" | sudo tee "$SDDM_CONF" > /dev/null
 else
     # Set Current
     if grep -q "^Current=" "$SDDM_CONF"; then
-        sudo sed -i "s|^Current=.*|Current=$SELECTED_THEME|" "$SDDM_CONF"
+        sudo sed -i "s|^Current=.*|Current=$INSTALL_NAME|" "$SDDM_CONF"
     else
         if grep -q "^\[Theme\]" "$SDDM_CONF"; then
-            sudo sed -i "/^\[Theme\]/a Current=$SELECTED_THEME" "$SDDM_CONF"
+            sudo sed -i "/^\[Theme\]/a Current=$INSTALL_NAME" "$SDDM_CONF"
         else
-            echo -e "\n[Theme]\nCurrent=$SELECTED_THEME" | sudo tee -a "$SDDM_CONF" > /dev/null
+            echo -e "\n[Theme]\nCurrent=$INSTALL_NAME" | sudo tee -a "$SDDM_CONF" > /dev/null
         fi
     fi
 fi
 
-success "Theme '$SELECTED_THEME' is now active!"
+success "Theme '$INSTALL_NAME' is now active!"
