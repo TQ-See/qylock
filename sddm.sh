@@ -309,7 +309,7 @@ if [ ! -f "$SDDM_CONF" ]; then
 else
     # Set Current
     if grep -q "^Current=" "$SDDM_CONF"; then
-        sudo sed -i "s/^Current=.*/Current=$SELECTED_THEME/" "$SDDM_CONF"
+        sudo sed -i "s|^Current=.*|Current=$SELECTED_THEME|" "$SDDM_CONF"
     else
         if grep -q "^\[Theme\]" "$SDDM_CONF"; then
             sudo sed -i "/^\[Theme\]/a Current=$SELECTED_THEME" "$SDDM_CONF"
